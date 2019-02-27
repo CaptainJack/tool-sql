@@ -19,3 +19,8 @@ dependencies {
 tasks.withType<KotlinJvmCompile> {
 	kotlinOptions.jvmTarget = "1.8"
 }
+
+tasks.create<Jar>("sourcesJar") {
+	archiveClassifier.set("sources")
+	from(sourceSets.main.get().allSource)
+}
