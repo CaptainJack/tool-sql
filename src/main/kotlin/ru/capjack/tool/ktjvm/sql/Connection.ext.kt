@@ -1,4 +1,4 @@
-package ru.capjack.ktjvm.sql
+package ru.capjack.tool.ktjvm.sql
 
 import org.intellij.lang.annotations.Language
 import java.sql.Connection

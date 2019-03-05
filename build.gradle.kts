@@ -6,7 +6,7 @@ plugins {
 	id("ru.capjack.capjack-bintray") version "0.16.0"
 }
 
-group = "ru.capjack.ktjvm"
+group = "ru.capjack.tool"
 
 repositories {
 	jcenter()

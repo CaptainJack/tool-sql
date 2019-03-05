@@ -1,4 +1,4 @@
-package ru.capjack.ktjvm.sql
+package ru.capjack.tool.ktjvm.sql
 
 import java.sql.ResultSet
 
