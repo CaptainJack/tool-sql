@@ -1,1 +1,1 @@
-rootProject.name = "ktjvm-sql"
+rootProject.name = "tool-sql-jvm"
