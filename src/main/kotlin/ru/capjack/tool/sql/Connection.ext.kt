@@ -23,6 +23,114 @@ inline fun <R> Connection.transaction(block: Connection.() -> R): R {
 	}
 }
 
+
+// Query
+
+inline fun <R> Connection.query(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
+	createStatement().use {
+		it.executeQuery(sql).use { rs ->
+			return rs.result()
+		}
+	}
+}
+
+inline fun Connection.queryIterate(@Language("SQL") sql: String, action: ResultSet.() -> Unit) {
+	query(sql) {
+		while (next()) {
+			action()
+		}
+	}
+}
+
+inline fun <E> Connection.queryList(@Language("SQL") sql: String, transform: ResultSet.() -> E): List<E> {
+	val list = mutableListOf<E>()
+	queryIterate(sql) {
+		list.add(transform())
+	}
+	return list
+}
+
+inline fun <K, V> Connection.queryMap(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
+	val map = mutableMapOf<K, V>()
+	queryIterate(sql) {
+		val (key, value) = transform()
+		map[key] = value
+		
+	}
+	return map
+}
+
+inline fun <K, V> Connection.queryMapGroup(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
+	val map = mutableMapOf<K, MutableList<V>>()
+	queryIterate(sql) {
+		val (key, value) = transform()
+		map.getOrPut(key) { mutableListOf() }.add(value)
+	}
+	return map
+}
+
+inline fun <R> Connection.queryFirstOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, default: () -> R): R {
+	query(sql) {
+		return if (next()) result() else default()
+	}
+}
+
+inline fun <R> Connection.queryFirst(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
+	return queryFirstOrElse(sql, result) {
+		throw SQLException("Query has empty result")
+	}
+}
+
+fun Connection.queryFirstExists(@Language("SQL") sql: String): Boolean {
+	return queryFirstOrElse(sql, { true }, { false })
+}
+
+
+// Update
+
+fun Connection.update(@Language("SQL") sql: String, check: Boolean = true): Int {
+	createStatement().use {
+		val rows = it.executeUpdate(sql)
+		if (check && rows == 0) {
+			throw SQLException("Update has not made any changes")
+		}
+		return rows
+	}
+}
+
+inline fun Connection.update(@Language("SQL") sql: String, fail: Connection.() -> Unit) {
+	if (0 == update(sql, false)) {
+		fail()
+	}
+}
+
+fun Connection.updateWithReturnGeneratedKeyLong(@Language("SQL") sql: String): Long {
+	return updateWithReturnGeneratedKeys(sql) { getLong(1) }
+}
+
+fun Connection.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: String): Int {
+	return updateWithReturnGeneratedKeys(sql) { getInt(1) }
+}
+
+inline fun <R> Connection.updateWithReturnGeneratedKeys(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
+	createStatement().use { st ->
+		
+		if (st.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS) == 0) {
+			throw SQLException("Update has not made any changes")
+		}
+		
+		st.generatedKeys.use {
+			if (it.next()) {
+				return it.result()
+			}
+			throw SQLException("Update has empty generate keys")
+		}
+	}
+}
+
+
+// Prepared query
+
 inline fun <R> Connection.query(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R {
 	AddablePreparedStatement.wrap(prepareStatement(sql)).use { st ->
 		st.setup()
@@ -32,37 +140,39 @@ inline fun <R> Connection.query(@Language("SQL") sql: String, setup: AddablePrep
 	}
 }
 
-inline fun <E> Connection.queryList(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> E): List<E> {
+inline fun Connection.queryIterate(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, action: ResultSet.() -> Unit) {
 	query(sql, setup) {
-		val list = mutableListOf<E>()
 		while (next()) {
-			list.add(transform(this))
+			action()
 		}
-		return list
 	}
+}
+
+inline fun <E> Connection.queryList(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> E): List<E> {
+	val list = mutableListOf<E>()
+	queryIterate(sql, setup) {
+		list.add(transform())
+	}
+	return list
 }
 
 inline fun <K, V> Connection.queryMap(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
-	query(sql, setup) {
-		val map = mutableMapOf<K, V>()
-		while (next()) {
-			val (key, value) = transform(this)
-			map[key] = value
-		}
-		return map
+	val map = mutableMapOf<K, V>()
+	queryIterate(sql, setup) {
+		val (key, value) = transform()
+		map[key] = value
+		
 	}
+	return map
 }
 
-
 inline fun <K, V> Connection.queryMapGroup(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
-	query(sql, setup) {
-		val map = mutableMapOf<K, MutableList<V>>()
-		while (next()) {
-			val (key, value) = transform(this)
-			map.getOrPut(key) { mutableListOf() }.add(value)
-		}
-		return map
+	val map = mutableMapOf<K, MutableList<V>>()
+	queryIterate(sql, setup) {
+		val (key, value) = transform()
+		map.getOrPut(key) { mutableListOf() }.add(value)
 	}
+	return map
 }
 
 inline fun <R> Connection.queryFirstOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, default: () -> R): R {
@@ -80,6 +190,9 @@ inline fun <R> Connection.queryFirst(@Language("SQL") sql: String, setup: Addabl
 inline fun Connection.queryFirstExists(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean {
 	return queryFirstOrElse(sql, setup, { true }, { false })
 }
+
+
+// Update prepared
 
 inline fun Connection.update(@Language("SQL") sql: String, check: Boolean = true, setup: AddablePreparedStatement.() -> Unit): Int {
 	AddablePreparedStatement.wrap(prepareStatement(sql)).use {
