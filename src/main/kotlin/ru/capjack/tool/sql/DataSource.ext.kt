@@ -46,12 +46,16 @@ fun DataSource.queryFirstExists(@Language("SQL") sql: String): Boolean {
 
 // Update
 
-fun DataSource.update(@Language("SQL") sql: String, check: Boolean = true): Int {
-	return connection.use { it.update(sql, check) }
+fun DataSource.update(@Language("SQL") sql: String): Int {
+	return connection.use { it.update(sql) }
 }
 
-inline fun DataSource.update(@Language("SQL") sql: String, fail: Connection.() -> Unit) {
-	return connection.use { it.update(sql, fail) }
+fun DataSource.updateMaybe(@Language("SQL") sql: String): Int {
+	return connection.use { it.updateMaybe(sql) }
+}
+
+inline fun DataSource.updateOrElse(@Language("SQL") sql: String, alternative: Connection.() -> Unit) {
+	return connection.use { it.updateOrElse(sql, alternative) }
 }
 
 fun DataSource.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: String): Int {
@@ -100,12 +104,16 @@ inline fun DataSource.queryFirstExists(@Language("SQL") sql: String, setup: Adda
 
 // Prepared update
 
-inline fun DataSource.update(@Language("SQL") sql: String, check: Boolean = true, setup: AddablePreparedStatement.() -> Unit): Int {
-	return connection.use { it.update(sql, check, setup) }
+inline fun DataSource.update(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
+	return connection.use { it.update(sql, setup) }
 }
 
-inline fun DataSource.update(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, fail: Connection.() -> Unit) {
-	return connection.use { it.update(sql, setup, fail) }
+inline fun DataSource.updateMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
+	return connection.use { it.updateMaybe(sql, setup) }
+}
+
+inline fun DataSource.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, alternative: Connection.() -> Unit) {
+	connection.use { it.updateOrElse(sql, setup, alternative) }
 }
 
 inline fun DataSource.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {

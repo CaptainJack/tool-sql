@@ -88,19 +88,23 @@ fun Connection.queryFirstExists(@Language("SQL") sql: String): Boolean {
 
 // Update
 
-fun Connection.update(@Language("SQL") sql: String, check: Boolean = true): Int {
+fun Connection.update(@Language("SQL") sql: String): Int {
+	val rows = updateMaybe(sql)
+	if (rows == 0) {
+		throw SQLException("Update has not made any changes")
+	}
+	return rows
+}
+
+fun Connection.updateMaybe(@Language("SQL") sql: String): Int {
 	createStatement().use {
-		val rows = it.executeUpdate(sql)
-		if (check && rows == 0) {
-			throw SQLException("Update has not made any changes")
-		}
-		return rows
+		return it.executeUpdate(sql)
 	}
 }
 
-inline fun Connection.update(@Language("SQL") sql: String, fail: Connection.() -> Unit) {
-	if (0 == update(sql, false)) {
-		fail()
+inline fun Connection.updateOrElse(@Language("SQL") sql: String, alternative: Connection.() -> Unit) {
+	if (0 == updateMaybe(sql)) {
+		alternative()
 	}
 }
 
@@ -194,20 +198,24 @@ inline fun Connection.queryFirstExists(@Language("SQL") sql: String, setup: Adda
 
 // Update prepared
 
-inline fun Connection.update(@Language("SQL") sql: String, check: Boolean = true, setup: AddablePreparedStatement.() -> Unit): Int {
+inline fun Connection.update(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
+	val rows = updateMaybe(sql, setup)
+	if (rows == 0) {
+		throw SQLException("Update has not made any changes")
+	}
+	return rows
+}
+
+inline fun Connection.updateMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
 	AddablePreparedStatement.wrap(prepareStatement(sql)).use {
 		it.setup()
-		val rows = it.executeUpdate()
-		if (check && rows == 0) {
-			throw SQLException("Update has not made any changes")
-		}
-		return rows
+		return it.executeUpdate()
 	}
 }
 
-inline fun Connection.update(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, fail: Connection.() -> Unit) {
-	if (0 == update(sql, false, setup)) {
-		fail()
+inline fun Connection.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, alternative: Connection.() -> Unit) {
+	if (0 == updateMaybe(sql, setup)) {
+		alternative()
 	}
 }
 
