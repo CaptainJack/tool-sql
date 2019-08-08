@@ -102,9 +102,9 @@ fun Connection.updateMaybe(@Language("SQL") sql: String): Int {
 	}
 }
 
-inline fun Connection.updateOrElse(@Language("SQL") sql: String, alternative: Connection.() -> Unit) {
+inline fun Connection.updateOrElse(@Language("SQL") sql: String, default: () -> Unit) {
 	if (0 == updateMaybe(sql)) {
-		alternative()
+		default()
 	}
 }
 
@@ -213,9 +213,9 @@ inline fun Connection.updateMaybe(@Language("SQL") sql: String, setup: AddablePr
 	}
 }
 
-inline fun Connection.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, alternative: Connection.() -> Unit) {
+inline fun Connection.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, default: () -> Unit) {
 	if (0 == updateMaybe(sql, setup)) {
-		alternative()
+		default()
 	}
 }
 

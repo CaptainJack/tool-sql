@@ -54,8 +54,8 @@ fun DataSource.updateMaybe(@Language("SQL") sql: String): Int {
 	return connection.use { it.updateMaybe(sql) }
 }
 
-inline fun DataSource.updateOrElse(@Language("SQL") sql: String, alternative: Connection.() -> Unit) {
-	return connection.use { it.updateOrElse(sql, alternative) }
+inline fun DataSource.updateOrElse(@Language("SQL") sql: String, default: () -> Unit) {
+	return connection.use { it.updateOrElse(sql, default) }
 }
 
 fun DataSource.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: String): Int {
@@ -112,8 +112,8 @@ inline fun DataSource.updateMaybe(@Language("SQL") sql: String, setup: AddablePr
 	return connection.use { it.updateMaybe(sql, setup) }
 }
 
-inline fun DataSource.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, alternative: Connection.() -> Unit) {
-	connection.use { it.updateOrElse(sql, setup, alternative) }
+inline fun DataSource.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, default: () -> Unit) {
+	connection.use { it.updateOrElse(sql, setup, default) }
 }
 
 inline fun DataSource.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
