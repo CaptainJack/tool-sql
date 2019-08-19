@@ -17,10 +17,19 @@ inline fun ResultSet.forEach(block: (ResultSet) -> Unit) {
 	}
 }
 
+
 fun ResultSet.getLocalDateTime(columnIndex: Int): LocalDateTime? {
 	return getTimestamp(columnIndex)?.toLocalDateTime()
 }
 
 fun ResultSet.getLocalDateTime(columnLabel: String): LocalDateTime? {
 	return getTimestamp(columnLabel)?.toLocalDateTime()
+}
+
+inline fun <reified E : Enum<E>> ResultSet.getEnum(columnIndex: Int): E {
+	return enumValueOf(getString(columnIndex))
+}
+
+inline fun <reified E : Enum<E>> ResultSet.getEnum(columnLabel: String): E {
+	return enumValueOf(getString(columnLabel))
 }

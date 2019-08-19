@@ -7,3 +7,7 @@ import java.time.LocalDateTime
 fun PreparedStatement.setLocalDateTime(parameterIndex: Int, x: LocalDateTime?) {
 	setTimestamp(parameterIndex, if (x == null) null else Timestamp.valueOf(x))
 }
+
+fun PreparedStatement.setEnum(parameterIndex: Int, x: Enum<*>?) {
+	setString(parameterIndex, x?.name)
+}

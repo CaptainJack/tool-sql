@@ -18,6 +18,8 @@ interface AddablePreparedStatement : PreparedStatement {
 	
 	fun addLocalDateTime(x: LocalDateTime?)
 	
+	fun addEnum(x: Enum<*>?)
+	
 	/**
 	 * @see PreparedStatement.setNull
 	 */

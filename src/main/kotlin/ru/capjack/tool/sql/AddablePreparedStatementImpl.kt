@@ -18,6 +18,10 @@ internal class AddablePreparedStatementImpl(private val source: PreparedStatemen
 		source.setLocalDateTime(ix(), x)
 	}
 	
+	override fun addEnum(x: Enum<*>?) {
+		source.setEnum(ix(), x)
+	}
+	
 	override fun addNull(sqlType: Int) {
 		source.setNull(ix(), sqlType)
 	}
