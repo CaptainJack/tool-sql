@@ -195,6 +195,13 @@ inline fun Connection.queryFirstExists(@Language("SQL") sql: String, setup: Adda
 	return queryFirstOrElse(sql, setup, { true }, { false })
 }
 
+inline fun <R> Connection.queryFirstMaybe(@Language("SQL") sql: String, result: ResultSet.() -> R): R? {
+	return queryFirstOrElse(sql, result, { null })
+}
+
+inline fun <R> Connection.queryFirstMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R? {
+	return queryFirstOrElse(sql, setup, result, { null })
+}
 
 // Update prepared
 
