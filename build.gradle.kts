@@ -1,7 +1,7 @@
 plugins {
-	kotlin("jvm") version "1.3.41"
-	id("nebula.release") version "11.1.0"
-	id("ru.capjack.bintray") version "0.20.1"
+	kotlin("jvm") version "1.3.71"
+	id("nebula.release") version "14.1.1"
+	id("ru.capjack.bintray") version "1.0.0"
 }
 
 group = "ru.capjack.tool"

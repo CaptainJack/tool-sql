@@ -1,3 +1,1 @@
-rootProject.name = "tool-sql-jvm"
-
-enableFeaturePreview("GRADLE_METADATA")
+rootProject.name = "tool-jvm-sql"
