@@ -12,209 +12,209 @@ import java.util.*
 internal class AddablePreparedStatementImpl(private val source: PreparedStatement) : AddablePreparedStatement, PreparedStatement by source {
 	private var index: Int = 0
 	
-	private fun ix() = ++index
+	override fun nextIndex() = ++index
 	
 	override fun addLocalDateTime(x: LocalDateTime?) {
-		source.setLocalDateTime(ix(), x)
+		source.setLocalDateTime(nextIndex(), x)
 	}
 	
 	override fun addEnum(x: Enum<*>?) {
-		source.setEnum(ix(), x)
+		source.setEnum(nextIndex(), x)
 	}
 	
 	override fun addNull(sqlType: Int) {
-		source.setNull(ix(), sqlType)
+		source.setNull(nextIndex(), sqlType)
 	}
 	
 	override fun addBoolean(x: Boolean) {
-		source.setBoolean(ix(), x)
+		source.setBoolean(nextIndex(), x)
 	}
 	
 	override fun addByte(x: Byte) {
-		source.setByte(ix(), x)
+		source.setByte(nextIndex(), x)
 	}
 	
 	override fun addShort(x: Short) {
-		source.setShort(ix(), x)
+		source.setShort(nextIndex(), x)
 	}
 	
 	override fun addInt(x: Int) {
-		source.setInt(ix(), x)
+		source.setInt(nextIndex(), x)
 	}
 	
 	override fun addLong(x: Long) {
-		source.setLong(ix(), x)
+		source.setLong(nextIndex(), x)
 	}
 	
 	override fun addFloat(x: Float) {
-		source.setFloat(ix(), x)
+		source.setFloat(nextIndex(), x)
 	}
 	
 	override fun addDouble(x: Double) {
-		source.setDouble(ix(), x)
+		source.setDouble(nextIndex(), x)
 	}
 	
 	override fun addBigDecimal(x: BigDecimal?) {
-		source.setBigDecimal(ix(), x)
+		source.setBigDecimal(nextIndex(), x)
 	}
 	
 	override fun addString(x: String?) {
-		source.setString(ix(), x)
+		source.setString(nextIndex(), x)
 	}
 	
 	override fun addBytes(x: ByteArray?) {
-		source.setBytes(ix(), x)
+		source.setBytes(nextIndex(), x)
 	}
 	
 	override fun addDate(x: Date?) {
-		source.setDate(ix(), x)
+		source.setDate(nextIndex(), x)
 	}
 	
 	override fun addTime(x: Time?) {
-		source.setTime(ix(), x)
+		source.setTime(nextIndex(), x)
 	}
 	
 	override fun addTimestamp(x: Timestamp?) {
-		source.setTimestamp(ix(), x)
+		source.setTimestamp(nextIndex(), x)
 	}
 	
 	override fun addAsciiStream(x: InputStream?, length: Int) {
-		source.setAsciiStream(ix(), x, length)
+		source.setAsciiStream(nextIndex(), x, length)
 	}
 	
 	override fun addBinaryStream(x: InputStream?, length: Int) {
-		source.setBinaryStream(ix(), x, length)
+		source.setBinaryStream(nextIndex(), x, length)
 	}
 	
 	override fun addObject(x: Any?, targetSqlType: Int) {
-		source.setObject(ix(), x, targetSqlType)
+		source.setObject(nextIndex(), x, targetSqlType)
 	}
 	
 	override fun addObject(x: Any?) {
-		source.setObject(ix(), x)
+		source.setObject(nextIndex(), x)
 	}
 	
 	override fun addCharacterStream(reader: Reader?, length: Int) {
-		source.setCharacterStream(ix(), reader, length)
+		source.setCharacterStream(nextIndex(), reader, length)
 	}
 	
 	override fun addRef(x: Ref?) {
-		source.setRef(ix(), x)
+		source.setRef(nextIndex(), x)
 	}
 	
 	override fun addBlob(x: Blob?) {
-		source.setBlob(ix(), x)
+		source.setBlob(nextIndex(), x)
 	}
 	
 	override fun addClob(x: Clob?) {
-		source.setClob(ix(), x)
+		source.setClob(nextIndex(), x)
 	}
 	
 	override fun addArray(x: java.sql.Array?) {
-		source.setArray(ix(), x)
+		source.setArray(nextIndex(), x)
 	}
 	
 	override fun addDate(x: Date?, cal: Calendar) {
-		source.setDate(ix(), x, cal)
+		source.setDate(nextIndex(), x, cal)
 	}
 	
 	override fun addTime(x: Time?, cal: Calendar) {
-		source.setTime(ix(), x, cal)
+		source.setTime(nextIndex(), x, cal)
 	}
 	
 	override fun addTimestamp(x: Timestamp?, cal: Calendar) {
-		source.setTimestamp(ix(), x, cal)
+		source.setTimestamp(nextIndex(), x, cal)
 	}
 	
 	override fun addNull(sqlType: Int, typeName: String) {
-		source.setNull(ix(), sqlType, typeName)
+		source.setNull(nextIndex(), sqlType, typeName)
 	}
 	
 	override fun addURL(x: URL?) {
-		source.setURL(ix(), x)
+		source.setURL(nextIndex(), x)
 	}
 	
 	override fun addRowId(x: RowId?) {
-		source.setRowId(ix(), x)
+		source.setRowId(nextIndex(), x)
 	}
 	
 	override fun addNString(value: String?) {
-		source.setNString(ix(), value)
+		source.setNString(nextIndex(), value)
 	}
 	
 	override fun addNCharacterStream(value: Reader?, length: Long) {
-		source.setNCharacterStream(ix(), value, length)
+		source.setNCharacterStream(nextIndex(), value, length)
 	}
 	
 	override fun addNClob(value: NClob?) {
-		source.setNClob(ix(), value)
+		source.setNClob(nextIndex(), value)
 	}
 	
 	override fun addClob(reader: Reader?, length: Long) {
-		source.setClob(ix(), reader, length)
+		source.setClob(nextIndex(), reader, length)
 	}
 	
 	override fun addBlob(inputStream: InputStream?, length: Long) {
-		source.setBlob(ix(), inputStream, length)
+		source.setBlob(nextIndex(), inputStream, length)
 	}
 	
 	override fun addNClob(reader: Reader?, length: Long) {
-		source.setNClob(ix(), reader, length)
+		source.setNClob(nextIndex(), reader, length)
 	}
 	
 	override fun addSQLXML(xmlObject: SQLXML?) {
-		source.setSQLXML(ix(), xmlObject)
+		source.setSQLXML(nextIndex(), xmlObject)
 	}
 	
 	override fun addObject(x: Any?, targetSqlType: Int, scaleOrLength: Int) {
-		source.setObject(ix(), x, targetSqlType, scaleOrLength)
+		source.setObject(nextIndex(), x, targetSqlType, scaleOrLength)
 	}
 	
 	override fun addAsciiStream(x: InputStream?, length: Long) {
-		source.setAsciiStream(ix(), x, length)
+		source.setAsciiStream(nextIndex(), x, length)
 	}
 	
 	override fun addBinaryStream(x: InputStream?, length: Long) {
-		source.setBinaryStream(ix(), x, length)
+		source.setBinaryStream(nextIndex(), x, length)
 	}
 	
 	override fun addCharacterStream(reader: Reader?, length: Long) {
-		source.setCharacterStream(ix(), reader, length)
+		source.setCharacterStream(nextIndex(), reader, length)
 	}
 	
 	override fun addAsciiStream(x: InputStream?) {
-		source.setAsciiStream(ix(), x)
+		source.setAsciiStream(nextIndex(), x)
 	}
 	
 	override fun addBinaryStream(x: InputStream?) {
-		source.setBinaryStream(ix(), x)
+		source.setBinaryStream(nextIndex(), x)
 	}
 	
 	override fun addCharacterStream(reader: Reader?) {
-		source.setCharacterStream(ix(), reader)
+		source.setCharacterStream(nextIndex(), reader)
 	}
 	
 	override fun addNCharacterStream(value: Reader?) {
-		source.setNCharacterStream(ix(), value)
+		source.setNCharacterStream(nextIndex(), value)
 	}
 	
 	override fun addClob(reader: Reader?) {
-		source.setClob(ix(), reader)
+		source.setClob(nextIndex(), reader)
 	}
 	
 	override fun addBlob(inputStream: InputStream?) {
-		source.setBlob(ix(), inputStream)
+		source.setBlob(nextIndex(), inputStream)
 	}
 	
 	override fun addNClob(reader: Reader?) {
-		source.setNClob(ix(), reader)
+		source.setNClob(nextIndex(), reader)
 	}
 	
 	override fun addObject(x: Any?, targetSqlType: SQLType, scaleOrLength: Int) {
-		source.setObject(ix(), x, targetSqlType, scaleOrLength)
+		source.setObject(nextIndex(), x, targetSqlType, scaleOrLength)
 	}
 	
 	override fun addObject(x: Any?, targetSqlType: SQLType) {
-		source.setObject(ix(), x, targetSqlType)
+		source.setObject(nextIndex(), x, targetSqlType)
 	}
 }

@@ -26,10 +26,19 @@ fun ResultSet.getLocalDateTime(columnLabel: String): LocalDateTime? {
 	return getTimestamp(columnLabel)?.toLocalDateTime()
 }
 
-inline fun <reified E : Enum<E>> ResultSet.getEnum(columnIndex: Int): E {
-	return enumValueOf(getString(columnIndex))
+
+inline fun <reified E : Enum<E>> ResultSet.getEnum(columnIndex: Int): E? {
+	return getEnum<E>(columnIndex, ::enumValueOf)
 }
 
-inline fun <reified E : Enum<E>> ResultSet.getEnum(columnLabel: String): E {
-	return enumValueOf(getString(columnLabel))
+inline fun <reified E : Enum<E>> ResultSet.getEnum(columnLabel: String): E? {
+	return getEnum<E>(columnLabel, ::enumValueOf)
+}
+
+inline fun <E : Enum<E>> ResultSet.getEnum(columnIndex: Int, mapper: (String) -> E): E? {
+	return getString(columnIndex)?.let(mapper)
+}
+
+inline fun <E : Enum<E>> ResultSet.getEnum(columnLabel: String, mapper: (String) -> E): E? {
+	return getString(columnLabel)?.let(mapper)
 }

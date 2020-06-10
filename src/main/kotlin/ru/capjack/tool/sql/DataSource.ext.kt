@@ -5,12 +5,12 @@ import java.sql.Connection
 import java.sql.ResultSet
 import javax.sql.DataSource
 
-inline fun <R> DataSource.connection(block: Connection.() -> R): R {
-	return connection.use { it.block() }
+inline fun <R> DataSource.connection(code: Connection.() -> R): R {
+	return connection.use { it.code() }
 }
 
-inline fun <R> DataSource.transaction(block: Connection.() -> R): R {
-	return connection { transaction(block) }
+inline fun <R> DataSource.transaction(code: Connection.() -> R): R {
+	return connection { transaction(code) }
 }
 
 // Query
@@ -39,8 +39,8 @@ inline fun <R> DataSource.queryFirst(@Language("SQL") sql: String, result: Resul
 	return connection { queryFirst(sql, result) }
 }
 
-inline fun <R> DataSource.queryFirstOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, default: () -> R): R {
-	return connection { queryFirstOrElse(sql, result, default) }
+inline fun <R> DataSource.queryFirstOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
+	return connection { queryFirstOrElse(sql, result, other) }
 }
 
 fun DataSource.queryFirstExists(@Language("SQL") sql: String): Boolean {
@@ -58,9 +58,10 @@ fun DataSource.updateMaybe(@Language("SQL") sql: String): Int {
 	return connection { updateMaybe(sql) }
 }
 
-inline fun DataSource.updateOrElse(@Language("SQL") sql: String, default: () -> Unit) {
-	return connection { updateOrElse(sql, default) }
+inline fun DataSource.updateOrElse(@Language("SQL") sql: String, other: () -> Unit) {
+	return connection { updateOrElse(sql, other) }
 }
+
 
 fun DataSource.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: String): Int {
 	return connection { updateWithReturnGeneratedKeyInt(sql) }
@@ -68,6 +69,24 @@ fun DataSource.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: String): In
 
 fun DataSource.updateWithReturnGeneratedKeyLong(@Language("SQL") sql: String): Long {
 	return connection { updateWithReturnGeneratedKeyLong(sql) }
+}
+
+
+fun DataSource.updateWithReturnGeneratedKeyIntMaybe(@Language("SQL") sql: String): Int? {
+	return connection { updateWithReturnGeneratedKeyIntMaybe(sql) }
+}
+
+fun DataSource.updateWithReturnGeneratedKeyLongMaybe(@Language("SQL") sql: String): Long? {
+	return connection { updateWithReturnGeneratedKeyLongMaybe(sql) }
+}
+
+
+fun DataSource.updateWithReturnGeneratedKeyIntOrElse(@Language("SQL") sql: String, other: () -> Int): Int {
+	return connection { updateWithReturnGeneratedKeyIntOrElse(sql, other) }
+}
+
+fun DataSource.updateWithReturnGeneratedKeyLongOrElse(@Language("SQL") sql: String, other: () -> Long): Long {
+	return connection { updateWithReturnGeneratedKeyLongOrElse(sql, other) }
 }
 
 
@@ -97,8 +116,8 @@ inline fun <R> DataSource.queryFirst(@Language("SQL") sql: String, setup: Addabl
 	return connection { queryFirst(sql, setup, result) }
 }
 
-inline fun <R> DataSource.queryFirstOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, default: () -> R): R {
-	return connection { queryFirstOrElse(sql, setup, result, default) }
+inline fun <R> DataSource.queryFirstOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: () -> R): R {
+	return connection { queryFirstOrElse(sql, setup, result, other) }
 }
 
 inline fun DataSource.queryFirstExists(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean {
@@ -124,9 +143,10 @@ inline fun DataSource.updateMaybe(@Language("SQL") sql: String, setup: AddablePr
 	return connection { updateMaybe(sql, setup) }
 }
 
-inline fun DataSource.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, default: () -> Unit) {
-	connection { updateOrElse(sql, setup, default) }
+inline fun DataSource.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Unit) {
+	connection { updateOrElse(sql, setup, other) }
 }
+
 
 inline fun DataSource.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
 	return connection { updateWithReturnGeneratedKeyInt(sql, setup) }
@@ -135,3 +155,22 @@ inline fun DataSource.updateWithReturnGeneratedKeyInt(@Language("SQL") sql: Stri
 inline fun DataSource.updateWithReturnGeneratedKeyLong(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long {
 	return connection { updateWithReturnGeneratedKeyLong(sql, setup) }
 }
+
+
+inline fun DataSource.updateWithReturnGeneratedKeyIntMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int? {
+	return connection { updateWithReturnGeneratedKeyIntMaybe(sql, setup) }
+}
+
+inline fun DataSource.updateWithReturnGeneratedKeyLongMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long? {
+	return connection { updateWithReturnGeneratedKeyLongMaybe(sql, setup) }
+}
+
+
+inline fun DataSource.updateWithReturnGeneratedKeyIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Int): Int {
+	return connection { updateWithReturnGeneratedKeyIntOrElse(sql, setup, other) }
+}
+
+inline fun DataSource.updateWithReturnGeneratedKeyLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Long): Long {
+	return connection { updateWithReturnGeneratedKeyLongOrElse(sql, setup, other) }
+}
+

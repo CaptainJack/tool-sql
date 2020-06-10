@@ -12,9 +12,7 @@ import java.util.*
 
 
 interface AddablePreparedStatement : PreparedStatement {
-	companion object {
-		fun wrap(statement: PreparedStatement): AddablePreparedStatement = AddablePreparedStatementImpl(statement)
-	}
+	fun nextIndex(): Int
 	
 	fun addLocalDateTime(x: LocalDateTime?)
 	
