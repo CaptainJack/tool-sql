@@ -1,5 +1,5 @@
 plugins {
-	kotlin("jvm") version "1.3.72"
+	kotlin("jvm") version "1.4.0"
 	id("nebula.release") version "14.1.1"
 	id("ru.capjack.bintray") version "1.0.0"
 }
@@ -12,8 +12,4 @@ repositories {
 
 kotlin {
 	target.compilations.all { kotlinOptions.jvmTarget = "1.8" }
-}
-
-dependencies {
-	implementation(kotlin("stdlib-jdk8"))
 }
