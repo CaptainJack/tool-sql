@@ -43,10 +43,9 @@ fun Connection.prepareAddableStatement(@Language("SQL") sql: String, columnNames
 	return AddablePreparedStatementImpl(prepareStatement(sql, columnNames))
 }
 
+///
 
-// Fetch
-
-inline fun <R> Connection.fetch(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
+inline fun <R> Connection.execute(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
 	createStatement().use {
 		it.executeQuery(sql).use { rs ->
 			return rs.result()
@@ -54,25 +53,25 @@ inline fun <R> Connection.fetch(@Language("SQL") sql: String, result: ResultSet.
 	}
 }
 
-inline fun Connection.fetchIterate(@Language("SQL") sql: String, action: ResultSet.() -> Unit) {
-	fetch(sql) {
+inline fun Connection.iterate(@Language("SQL") sql: String, action: ResultSet.() -> Unit) {
+	execute(sql) {
 		while (next()) {
 			action()
 		}
 	}
 }
 
-inline fun <E> Connection.fetchList(@Language("SQL") sql: String, transform: ResultSet.() -> E): List<E> {
+inline fun <E> Connection.map(@Language("SQL") sql: String, transform: ResultSet.() -> E): List<E> {
 	val list = mutableListOf<E>()
-	fetchIterate(sql) {
+	iterate(sql) {
 		list.add(transform())
 	}
 	return list
 }
 
-inline fun <K, V> Connection.fetchMap(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
+inline fun <K, V> Connection.associate(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
 	val map = mutableMapOf<K, V>()
-	fetchIterate(sql) {
+	iterate(sql) {
 		val (key, value) = transform()
 		map[key] = value
 		
@@ -80,83 +79,86 @@ inline fun <K, V> Connection.fetchMap(@Language("SQL") sql: String, transform: R
 	return map
 }
 
-inline fun <K, V> Connection.fetchMapGroup(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
+inline fun <K, V> Connection.group(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
 	val map = mutableMapOf<K, MutableList<V>>()
-	fetchIterate(sql) {
+	iterate(sql) {
 		val (key, value) = transform()
 		map.getOrPut(key) { mutableListOf() }.add(value)
 	}
 	return map
 }
 
-inline fun <R> Connection.fetchFirstOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
-	fetch(sql) {
-		return if (next()) result() else other()
-	}
-}
-
-inline fun <R> Connection.fetchFirst(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
-	return fetchFirstOrElse(sql, result) {
+inline fun <R> Connection.get(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
+	return getOrElse(sql, result) {
 		throw SQLException("Query has empty result")
 	}
 }
 
-fun Connection.fetchExists(@Language("SQL") sql: String): Boolean {
-	return fetchFirstOrElse(sql, { true }, { false })
+inline fun <R> Connection.getOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
+	execute(sql) {
+		return if (next()) result() else other()
+	}
 }
 
+inline fun <R> Connection.getMaybe(@Language("SQL") sql: String, result: ResultSet.() -> R): R? {
+	return getOrElse(sql, result, { null })
+}
 
-// Put
+fun Connection.exists(@Language("SQL") sql: String): Boolean {
+	return getOrElse(sql, { true }, { false })
+}
 
-fun Connection.put(@Language("SQL") sql: String): Int {
-	val rows = putMaybe(sql)
+///
+
+fun Connection.update(@Language("SQL") sql: String): Int {
+	val rows = updateMaybe(sql)
 	if (rows == 0) {
 		throw SQLException("Update has not made any changes")
 	}
 	return rows
 }
 
-fun Connection.putMaybe(@Language("SQL") sql: String): Int {
+fun Connection.updateMaybe(@Language("SQL") sql: String): Int {
 	createStatement().use {
 		return it.executeUpdate(sql)
 	}
 }
 
-inline fun Connection.putOrElse(@Language("SQL") sql: String, other: () -> Unit) {
-	if (0 == putMaybe(sql)) {
+inline fun Connection.updateOrElse(@Language("SQL") sql: String, other: () -> Unit) {
+	if (0 == updateMaybe(sql)) {
 		other()
 	}
 }
 
 
-fun Connection.putAndGetGeneratedKeyInt(@Language("SQL") sql: String): Int {
-	return putAndGetGeneratedKeysOrElse(sql, { getInt(1) }, { throw SQLException("Update has not made any changes") })
+fun Connection.updateAndGetGeneratedKeyInt(@Language("SQL") sql: String): Int {
+	return updateAndGetGeneratedKeysOrElse(sql, { getInt(1) }, { throw SQLException("Update has not made any changes") })
 }
 
-fun Connection.putAndGetGeneratedKeyLong(@Language("SQL") sql: String): Long {
-	return putAndGetGeneratedKeysOrElse(sql, { getLong(1) }, { throw SQLException("Update has not made any changes") })
-}
-
-
-fun Connection.putAndGetGeneratedKeyIntMaybe(@Language("SQL") sql: String): Int? {
-	return putAndGetGeneratedKeysOrElse(sql, { getInt(1) }, { null })
-}
-
-fun Connection.putAndGetGeneratedKeyLongMaybe(@Language("SQL") sql: String): Long? {
-	return putAndGetGeneratedKeysOrElse(sql, { getLong(1) }, { null })
+fun Connection.updateAndGetGeneratedKeyLong(@Language("SQL") sql: String): Long {
+	return updateAndGetGeneratedKeysOrElse(sql, { getLong(1) }, { throw SQLException("Update has not made any changes") })
 }
 
 
-fun Connection.putAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, other: () -> Int): Int {
-	return putAndGetGeneratedKeysOrElse(sql, { getInt(1) }, other)
+fun Connection.updateAndGetGeneratedKeyIntMaybe(@Language("SQL") sql: String): Int? {
+	return updateAndGetGeneratedKeysOrElse(sql, { getInt(1) }, { null })
 }
 
-fun Connection.putAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, other: () -> Long): Long {
-	return putAndGetGeneratedKeysOrElse(sql, { getLong(1) }, other)
+fun Connection.updateAndGetGeneratedKeyLongMaybe(@Language("SQL") sql: String): Long? {
+	return updateAndGetGeneratedKeysOrElse(sql, { getLong(1) }, { null })
 }
 
 
-inline fun <R> Connection.putAndGetGeneratedKeysOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
+fun Connection.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, other: () -> Int): Int {
+	return updateAndGetGeneratedKeysOrElse(sql, { getInt(1) }, other)
+}
+
+fun Connection.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, other: () -> Long): Long {
+	return updateAndGetGeneratedKeysOrElse(sql, { getLong(1) }, other)
+}
+
+
+inline fun <R> Connection.updateAndGetGeneratedKeysOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
 	createStatement().use { st ->
 		
 		if (st.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS) == 0) {
@@ -173,9 +175,9 @@ inline fun <R> Connection.putAndGetGeneratedKeysOrElse(@Language("SQL") sql: Str
 }
 
 
-// Prepared fetch
+// Prepared
 
-inline fun <R> Connection.fetch(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R {
+inline fun <R> Connection.execute(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R {
 	prepareAddableStatement(sql).use { st ->
 		st.setup()
 		st.executeQuery().use {
@@ -184,25 +186,25 @@ inline fun <R> Connection.fetch(@Language("SQL") sql: String, setup: AddablePrep
 	}
 }
 
-inline fun Connection.fetchIterate(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, action: ResultSet.() -> Unit) {
-	fetch(sql, setup) {
+inline fun Connection.iterate(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, action: ResultSet.() -> Unit) {
+	execute(sql, setup) {
 		while (next()) {
 			action()
 		}
 	}
 }
 
-inline fun <E> Connection.fetchList(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> E): List<E> {
+inline fun <E> Connection.map(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> E): List<E> {
 	val list = mutableListOf<E>()
-	fetchIterate(sql, setup) {
+	iterate(sql, setup) {
 		list.add(transform())
 	}
 	return list
 }
 
-inline fun <K, V> Connection.fetchMap(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
+inline fun <K, V> Connection.associate(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
 	val map = mutableMapOf<K, V>()
-	fetchIterate(sql, setup) {
+	iterate(sql, setup) {
 		val (key, value) = transform()
 		map[key] = value
 		
@@ -210,90 +212,86 @@ inline fun <K, V> Connection.fetchMap(@Language("SQL") sql: String, setup: Addab
 	return map
 }
 
-inline fun <K, V> Connection.fetchMapGroup(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
+inline fun <K, V> Connection.group(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
 	val map = mutableMapOf<K, MutableList<V>>()
-	fetchIterate(sql, setup) {
+	iterate(sql, setup) {
 		val (key, value) = transform()
 		map.getOrPut(key) { mutableListOf() }.add(value)
 	}
 	return map
 }
 
-inline fun <R> Connection.fetchFirstOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: () -> R): R {
-	fetch(sql, setup) {
-		return if (next()) result() else other()
-	}
-}
-
-inline fun <R> Connection.fetchFirst(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R {
-	return fetchFirstOrElse(sql, setup, result) {
+inline fun <R> Connection.get(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R {
+	return getOrElse(sql, setup, result) {
 		throw SQLException("Query has empty result")
 	}
 }
 
-inline fun Connection.fetchExists(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean {
-	return fetchFirstOrElse(sql, setup, { true }, { false })
+inline fun <R> Connection.getOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: () -> R): R {
+	execute(sql, setup) {
+		return if (next()) result() else other()
+	}
 }
 
-inline fun <R> Connection.fetchFirstMaybe(@Language("SQL") sql: String, result: ResultSet.() -> R): R? {
-	return fetchFirstOrElse(sql, result, { null })
+inline fun <R> Connection.getMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R? {
+	return getOrElse(sql, setup, result, { null })
 }
 
-inline fun <R> Connection.fetchFirstMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R? {
-	return fetchFirstOrElse(sql, setup, result, { null })
+inline fun Connection.exists(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean {
+	return getOrElse(sql, setup, { true }, { false })
 }
 
-// Put prepared
+///
 
-inline fun Connection.put(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
-	val rows = putMaybe(sql, setup)
+inline fun Connection.update(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
+	val rows = updateMaybe(sql, setup)
 	if (rows == 0) {
 		throw SQLException("Update has not made any changes")
 	}
 	return rows
 }
 
-inline fun Connection.putMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
+inline fun Connection.updateMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
 	prepareAddableStatement(sql).use {
 		it.setup()
 		return it.executeUpdate()
 	}
 }
 
-inline fun Connection.putOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Unit) {
-	if (0 == putMaybe(sql, setup)) {
+inline fun Connection.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Unit) {
+	if (0 == updateMaybe(sql, setup)) {
 		other()
 	}
 }
 
-inline fun Connection.putAndGetGeneratedKeyInt(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
-	return putAndGetGeneratedKeysOrElse(sql, setup, { getInt(1) }, { throw SQLException("Update has not made any changes") })
+inline fun Connection.updateAndGetGeneratedKeyInt(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
+	return updateAndGetGeneratedKeysOrElse(sql, setup, { getInt(1) }, { throw SQLException("Update has not made any changes") })
 }
 
-inline fun Connection.putAndGetGeneratedKeyLong(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long {
-	return putAndGetGeneratedKeysOrElse(sql, setup, { getLong(1) }, { throw SQLException("Update has not made any changes") })
-}
-
-
-inline fun Connection.putAndGetGeneratedKeyIntMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int? {
-	return putAndGetGeneratedKeysOrElse(sql, setup, { getInt(1) }, { null })
-}
-
-inline fun Connection.putAndGetGeneratedKeyLongMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long? {
-	return putAndGetGeneratedKeysOrElse(sql, setup, { getLong(1) }, { null })
+inline fun Connection.updateAndGetGeneratedKeyLong(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long {
+	return updateAndGetGeneratedKeysOrElse(sql, setup, { getLong(1) }, { throw SQLException("Update has not made any changes") })
 }
 
 
-inline fun Connection.putAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Int): Int {
-	return putAndGetGeneratedKeysOrElse(sql, setup, { getInt(1) }, other)
+inline fun Connection.updateAndGetGeneratedKeyIntMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int? {
+	return updateAndGetGeneratedKeysOrElse(sql, setup, { getInt(1) }, { null })
 }
 
-inline fun Connection.putAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Long): Long {
-	return putAndGetGeneratedKeysOrElse(sql, setup, { getLong(1) }, other)
+inline fun Connection.updateAndGetGeneratedKeyLongMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long? {
+	return updateAndGetGeneratedKeysOrElse(sql, setup, { getLong(1) }, { null })
 }
 
 
-inline fun <R> Connection.putAndGetGeneratedKeysOrElse(
+inline fun Connection.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Int): Int {
+	return updateAndGetGeneratedKeysOrElse(sql, setup, { getInt(1) }, other)
+}
+
+inline fun Connection.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Long): Long {
+	return updateAndGetGeneratedKeysOrElse(sql, setup, { getLong(1) }, other)
+}
+
+
+inline fun <R> Connection.updateAndGetGeneratedKeysOrElse(
 	@Language("SQL") sql: String,
 	setup: AddablePreparedStatement.() -> Unit,
 	result: ResultSet.() -> R,
