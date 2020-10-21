@@ -12,7 +12,13 @@ import java.util.*
 internal class AddablePreparedStatementImpl(private val source: PreparedStatement) : AddablePreparedStatement, PreparedStatement by source {
 	private var index: Int = 0
 	
-	override fun nextIndex() = ++index
+	override fun nextIndex(): Int {
+		return ++index
+	}
+	
+	override fun resetIndex() {
+		index = 0
+	}
 	
 	override fun addLocalDateTime(x: LocalDateTime?) {
 		source.setLocalDateTime(nextIndex(), x)

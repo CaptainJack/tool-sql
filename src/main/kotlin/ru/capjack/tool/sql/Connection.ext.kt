@@ -312,3 +312,20 @@ inline fun <R> Connection.updateAndGetGeneratedKeysOrElse(
 		}
 	}
 }
+
+inline fun <E> Connection.updateBatch(@Language("SQL") sql: String, collection: Collection<E>, batch: Int = collection.size, setup: AddablePreparedStatement.(E) -> Unit) {
+	prepareAddableStatement(sql).use { st ->
+		var i = 0
+		collection.forEach {
+			st.setup(it)
+			st.addBatch()
+			if (++i == batch) {
+				st.executeBatch()
+				i = 0
+			}
+		}
+		if (i != 0) {
+			st.executeBatch()
+		}
+	}
+}

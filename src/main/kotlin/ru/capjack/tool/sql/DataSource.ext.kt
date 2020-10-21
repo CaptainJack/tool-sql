@@ -174,3 +174,6 @@ inline fun DataSource.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: S
 	return connection { updateAndGetGeneratedKeyLongOrElse(sql, setup, other) }
 }
 
+inline fun <E> DataSource.updateBatch(@Language("SQL") sql: String, collection: Collection<E>, batch: Int = collection.size, setup: AddablePreparedStatement.(E) -> Unit) {
+	connection { updateBatch(sql, collection, batch, setup) }
+}

@@ -14,6 +14,8 @@ import java.util.*
 interface AddablePreparedStatement : PreparedStatement {
 	fun nextIndex(): Int
 	
+	fun resetIndex()
+	
 	fun addLocalDateTime(x: LocalDateTime?)
 	
 	fun addEnum(x: Enum<*>?)
