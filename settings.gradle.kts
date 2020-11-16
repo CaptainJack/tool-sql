@@ -1,1 +1,1 @@
-rootProject.name = "tool-jvm-sql"
+rootProject.name = "tool-sql"
