@@ -3,17 +3,17 @@ package ru.capjack.tool.sql
 import java.sql.ResultSet
 import java.time.LocalDateTime
 
-inline fun ResultSet.forNext(block: (ResultSet) -> Unit): Boolean {
+inline fun ResultSet.forNext(action: (ResultSet) -> Unit): Boolean {
 	return if (next()) {
-		block(this)
+		action(this)
 		true
 	}
 	else false
 }
 
-inline fun ResultSet.forEach(block: (ResultSet) -> Unit) {
+inline fun ResultSet.forEach(action: (ResultSet) -> Unit) {
 	while (next()) {
-		block(this)
+		action(this)
 	}
 }
 

@@ -55,31 +55,29 @@ inline fun <R> Connection.execute(@Language("SQL") sql: String, result: ResultSe
 
 inline fun Connection.iterate(@Language("SQL") sql: String, action: ResultSet.() -> Unit) {
 	execute(sql) {
-		while (next()) {
-			action()
-		}
+		forEach(action)
 	}
 }
 
-inline fun <E> Connection.map(@Language("SQL") sql: String, transform: ResultSet.() -> E): List<E> {
+inline fun <E> Connection.fetchList(@Language("SQL") sql: String, fetcher: ResultSet.() -> E): List<E> {
 	val list = mutableListOf<E>()
 	iterate(sql) {
-		list.add(transform())
+		list.add(fetcher())
 	}
 	return list
 }
 
-inline fun <K, V> Connection.associate(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
+inline fun <K, V> Connection.fetchMap(@Language("SQL") sql: String, fetcher: ResultSet.() -> Pair<K, V>): Map<K, V> {
 	val map = mutableMapOf<K, V>()
 	iterate(sql) {
-		val (key, value) = transform()
+		val (key, value) = fetcher()
 		map[key] = value
 		
 	}
 	return map
 }
 
-inline fun <K, V> Connection.group(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
+inline fun <K, V> Connection.fetchGroups(@Language("SQL") sql: String, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
 	val map = mutableMapOf<K, MutableList<V>>()
 	iterate(sql) {
 		val (key, value) = transform()
@@ -88,24 +86,24 @@ inline fun <K, V> Connection.group(@Language("SQL") sql: String, transform: Resu
 	return map
 }
 
-inline fun <R> Connection.get(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
-	return getOrElse(sql, result) {
+inline fun <R> Connection.fetch(@Language("SQL") sql: String, result: ResultSet.() -> R): R {
+	return fetchOrElse(sql, result) {
 		throw SQLException("Query has empty result")
 	}
 }
 
-inline fun <R> Connection.getOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
+inline fun <R> Connection.fetchOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
 	execute(sql) {
 		return if (next()) result() else other()
 	}
 }
 
-inline fun <R> Connection.getMaybe(@Language("SQL") sql: String, result: ResultSet.() -> R): R? {
-	return getOrElse(sql, result, { null })
+inline fun <R> Connection.fetchMaybe(@Language("SQL") sql: String, result: ResultSet.() -> R): R? {
+	return fetchOrElse(sql, result, { null })
 }
 
 fun Connection.exists(@Language("SQL") sql: String): Boolean {
-	return getOrElse(sql, { true }, { false })
+	return fetchOrElse(sql, { true }, { false })
 }
 
 ///
@@ -188,13 +186,11 @@ inline fun <R> Connection.execute(@Language("SQL") sql: String, setup: AddablePr
 
 inline fun Connection.iterate(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, action: ResultSet.() -> Unit) {
 	execute(sql, setup) {
-		while (next()) {
-			action()
-		}
+		forEach(action)
 	}
 }
 
-inline fun <E> Connection.map(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> E): List<E> {
+inline fun <E> Connection.fetchList(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> E): List<E> {
 	val list = mutableListOf<E>()
 	iterate(sql, setup) {
 		list.add(transform())
@@ -202,7 +198,7 @@ inline fun <E> Connection.map(@Language("SQL") sql: String, setup: AddablePrepar
 	return list
 }
 
-inline fun <K, V> Connection.associate(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
+inline fun <K, V> Connection.fetchMap(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, V> {
 	val map = mutableMapOf<K, V>()
 	iterate(sql, setup) {
 		val (key, value) = transform()
@@ -212,7 +208,7 @@ inline fun <K, V> Connection.associate(@Language("SQL") sql: String, setup: Adda
 	return map
 }
 
-inline fun <K, V> Connection.group(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
+inline fun <K, V> Connection.fetchGroups(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, transform: ResultSet.() -> Pair<K, V>): Map<K, List<V>> {
 	val map = mutableMapOf<K, MutableList<V>>()
 	iterate(sql, setup) {
 		val (key, value) = transform()
@@ -221,24 +217,24 @@ inline fun <K, V> Connection.group(@Language("SQL") sql: String, setup: AddableP
 	return map
 }
 
-inline fun <R> Connection.get(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R {
-	return getOrElse(sql, setup, result) {
+inline fun <R> Connection.fetch(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R {
+	return fetchOrElse(sql, setup, result) {
 		throw SQLException("Query has empty result")
 	}
 }
 
-inline fun <R> Connection.getOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: () -> R): R {
+inline fun <R> Connection.fetchOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: () -> R): R {
 	execute(sql, setup) {
 		return if (next()) result() else other()
 	}
 }
 
-inline fun <R> Connection.getMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R? {
-	return getOrElse(sql, setup, result, { null })
+inline fun <R> Connection.fetchMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R? {
+	return fetchOrElse(sql, setup, result, { null })
 }
 
 inline fun Connection.exists(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean {
-	return getOrElse(sql, setup, { true }, { false })
+	return fetchOrElse(sql, setup, { true }, { false })
 }
 
 ///
