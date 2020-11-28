@@ -40,7 +40,7 @@ inline fun <R> DataSource.fetch(@Language("SQL") sql: String, result: ResultSet.
 	return connection { fetch(sql, result) }
 }
 
-inline fun <R> DataSource.fetchOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
+inline fun <R> DataSource.fetchOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: Connection.() -> R): R {
 	return connection { fetchOrElse(sql, result, other) }
 }
 
@@ -63,7 +63,7 @@ fun DataSource.updateMaybe(@Language("SQL") sql: String): Int {
 	return connection { updateMaybe(sql) }
 }
 
-inline fun DataSource.updateOrElse(@Language("SQL") sql: String, other: () -> Unit) {
+inline fun DataSource.updateOrElse(@Language("SQL") sql: String, other: Connection.() -> Unit) {
 	return connection { updateOrElse(sql, other) }
 }
 
@@ -85,11 +85,11 @@ fun DataSource.updateAndGetGeneratedKeyLongMaybe(@Language("SQL") sql: String): 
 }
 
 
-fun DataSource.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, other: () -> Int): Int {
+fun DataSource.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, other: Connection.() -> Int): Int {
 	return connection { updateAndGetGeneratedKeyIntOrElse(sql, other) }
 }
 
-fun DataSource.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, other: () -> Long): Long {
+fun DataSource.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, other: Connection.() -> Long): Long {
 	return connection { updateAndGetGeneratedKeyLongOrElse(sql, other) }
 }
 
@@ -120,7 +120,7 @@ inline fun <R> DataSource.fetch(@Language("SQL") sql: String, setup: AddablePrep
 	return connection { fetch(sql, setup, result) }
 }
 
-inline fun <R> DataSource.fetchOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: () -> R): R {
+inline fun <R> DataSource.fetchOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: Connection.() -> R): R {
 	return connection { fetchOrElse(sql, setup, result, other) }
 }
 
@@ -143,7 +143,7 @@ inline fun DataSource.updateMaybe(@Language("SQL") sql: String, setup: AddablePr
 	return connection { updateMaybe(sql, setup) }
 }
 
-inline fun DataSource.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Unit) {
+inline fun DataSource.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Unit) {
 	connection { updateOrElse(sql, setup, other) }
 }
 
@@ -166,11 +166,11 @@ inline fun DataSource.updateAndGetGeneratedKeyLongMaybe(@Language("SQL") sql: St
 }
 
 
-inline fun DataSource.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Int): Int {
+inline fun DataSource.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Int): Int {
 	return connection { updateAndGetGeneratedKeyIntOrElse(sql, setup, other) }
 }
 
-inline fun DataSource.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Long): Long {
+inline fun DataSource.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Long): Long {
 	return connection { updateAndGetGeneratedKeyLongOrElse(sql, setup, other) }
 }
 

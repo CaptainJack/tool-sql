@@ -92,10 +92,13 @@ inline fun <R> Connection.fetch(@Language("SQL") sql: String, result: ResultSet.
 	}
 }
 
-inline fun <R> Connection.fetchOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
+inline fun <R> Connection.fetchOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: Connection.() -> R): R {
 	execute(sql) {
-		return if (next()) result() else other()
+		if (next()) {
+			return result()
+		}
 	}
+	return other()
 }
 
 inline fun <R> Connection.fetchMaybe(@Language("SQL") sql: String, result: ResultSet.() -> R): R? {
@@ -122,7 +125,7 @@ fun Connection.updateMaybe(@Language("SQL") sql: String): Int {
 	}
 }
 
-inline fun Connection.updateOrElse(@Language("SQL") sql: String, other: () -> Unit) {
+inline fun Connection.updateOrElse(@Language("SQL") sql: String, other: Connection.() -> Unit) {
 	if (0 == updateMaybe(sql)) {
 		other()
 	}
@@ -147,29 +150,27 @@ fun Connection.updateAndGetGeneratedKeyLongMaybe(@Language("SQL") sql: String): 
 }
 
 
-fun Connection.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, other: () -> Int): Int {
+fun Connection.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, other: Connection.() -> Int): Int {
 	return updateAndGetGeneratedKeysOrElse(sql, { getInt(1) }, other)
 }
 
-fun Connection.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, other: () -> Long): Long {
+fun Connection.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, other: Connection.() -> Long): Long {
 	return updateAndGetGeneratedKeysOrElse(sql, { getLong(1) }, other)
 }
 
 
-inline fun <R> Connection.updateAndGetGeneratedKeysOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: () -> R): R {
+inline fun <R> Connection.updateAndGetGeneratedKeysOrElse(@Language("SQL") sql: String, result: ResultSet.() -> R, other: Connection.() -> R): R {
 	createStatement().use { st ->
-		
-		if (st.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS) == 0) {
-			return other()
-		}
-		
-		st.generatedKeys.use {
-			if (it.next()) {
-				return it.result()
+		if (st.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS) != 0) {
+			st.generatedKeys.use {
+				if (it.next()) {
+					return it.result()
+				}
+				throw SQLException("Update has empty generate keys")
 			}
-			throw SQLException("Update has empty generate keys")
 		}
 	}
+	return other()
 }
 
 
@@ -223,10 +224,13 @@ inline fun <R> Connection.fetch(@Language("SQL") sql: String, setup: AddablePrep
 	}
 }
 
-inline fun <R> Connection.fetchOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: () -> R): R {
+inline fun <R> Connection.fetchOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R, other: Connection.() -> R): R {
 	execute(sql, setup) {
-		return if (next()) result() else other()
+		if (next()) {
+			return result()
+		}
 	}
+	return other()
 }
 
 inline fun <R> Connection.fetchMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, result: ResultSet.() -> R): R? {
@@ -254,7 +258,7 @@ inline fun Connection.updateMaybe(@Language("SQL") sql: String, setup: AddablePr
 	}
 }
 
-inline fun Connection.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Unit) {
+inline fun Connection.updateOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Unit) {
 	if (0 == updateMaybe(sql, setup)) {
 		other()
 	}
@@ -278,11 +282,11 @@ inline fun Connection.updateAndGetGeneratedKeyLongMaybe(@Language("SQL") sql: St
 }
 
 
-inline fun Connection.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Int): Int {
+inline fun Connection.updateAndGetGeneratedKeyIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Int): Int {
 	return updateAndGetGeneratedKeysOrElse(sql, setup, { getInt(1) }, other)
 }
 
-inline fun Connection.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: () -> Long): Long {
+inline fun Connection.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Long): Long {
 	return updateAndGetGeneratedKeysOrElse(sql, setup, { getLong(1) }, other)
 }
 
@@ -291,7 +295,7 @@ inline fun <R> Connection.updateAndGetGeneratedKeysOrElse(
 	@Language("SQL") sql: String,
 	setup: AddablePreparedStatement.() -> Unit,
 	result: ResultSet.() -> R,
-	other: () -> R
+	other: Connection.() -> R
 ): R {
 	prepareAddableStatement(sql, Statement.RETURN_GENERATED_KEYS).use { st ->
 		st.setup()
