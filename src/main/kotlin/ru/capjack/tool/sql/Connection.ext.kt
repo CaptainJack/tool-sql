@@ -317,6 +317,7 @@ inline fun <E> Connection.updateBatch(@Language("SQL") sql: String, collection: 
 	prepareAddableStatement(sql).use { st ->
 		var i = 0
 		collection.forEach {
+			st.resetIndex()
 			st.setup(it)
 			st.addBatch()
 			if (++i == batch) {
