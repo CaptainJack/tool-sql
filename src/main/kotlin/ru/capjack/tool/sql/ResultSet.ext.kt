@@ -17,6 +17,11 @@ inline fun ResultSet.forEach(action: (ResultSet) -> Unit) {
 	}
 }
 
+inline fun <E> ResultSet.ofNext(action: ResultSet.() -> E): E? {
+	return if (next()) action(this) else null
+}
+
+
 
 fun ResultSet.getLocalDateTime(columnIndex: Int): LocalDateTime? {
 	return getTimestamp(columnIndex)?.toLocalDateTime()
