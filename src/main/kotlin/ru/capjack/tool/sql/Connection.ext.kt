@@ -241,6 +241,29 @@ inline fun Connection.exists(@Language("SQL") sql: String, setup: AddablePrepare
 	return fetchOrElse(sql, setup, { true }, { false })
 }
 
+
+inline fun <E, R> Connection.fetchListSeparately(
+	@Language("SQL") sql: String,
+	collection: Collection<E>,
+	setup: AddablePreparedStatement.(E) -> Unit,
+	transform: ResultSet.(E) -> R
+): List<R> {
+	return if (collection.isEmpty())
+		emptyList()
+	else
+		prepareAddableStatement(sql).use { st ->
+			collection.mapNotNull { e ->
+				st.resetIndex()
+				st.setup(e)
+				st.executeQuery().use { rs ->
+					rs.ofNext {
+						transform(e)
+					}
+				}
+			}
+		}
+}
+
 ///
 
 inline fun Connection.update(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {

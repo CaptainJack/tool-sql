@@ -133,6 +133,15 @@ inline fun DataSource.exists(@Language("SQL") sql: String, setup: AddablePrepare
 }
 
 
+inline fun <E, R> DataSource.fetchListSeparately(
+	@Language("SQL") sql: String,
+	collection: Collection<E>,
+	setup: AddablePreparedStatement.(E) -> Unit,
+	transform: ResultSet.(E) -> R
+): List<R> {
+	return connection { fetchListSeparately(sql, collection, setup, transform) }
+}
+
 ///
 
 inline fun DataSource.update(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
