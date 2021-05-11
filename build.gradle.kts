@@ -1,15 +1,14 @@
 plugins {
-	kotlin("jvm") version "1.4.20"
-	id("nebula.release") version "15.3.0"
-	id("ru.capjack.bintray") version "1.0.0"
+	kotlin("jvm") version "1.5.0"
+	id("ru.capjack.publisher") version "0.2.0"
 }
 
 group = "ru.capjack.tool"
 
 repositories {
-	jcenter()
+	mavenCentral()
 }
 
 kotlin {
-	target.compilations.all { kotlinOptions.jvmTarget = "1.8" }
+	target.compilations.all { kotlinOptions.jvmTarget = "11" }
 }
