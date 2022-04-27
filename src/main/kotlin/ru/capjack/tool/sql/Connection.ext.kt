@@ -355,3 +355,177 @@ inline fun <E> Connection.updateBatch(@Language("SQL") sql: String, collection: 
 		}
 	}
 }
+
+///
+
+
+
+inline fun Connection.getOrPutGeneratedKeyInt(
+	@Language("SQL") get: String, getSetup: AddablePreparedStatement.() -> Unit,
+	@Language("SQL") put: String, putSetup: AddablePreparedStatement.() -> Unit,
+): Int {
+	prepareAddableStatement(get).use { select ->
+		select.getSetup()
+		select.executeQuery().use {
+			if (it.next()) return it.getInt(1)
+		}
+		
+		return updateAndGetGeneratedKeyIntOrElse(put, putSetup) {
+			select.executeQuery().use {
+				if (it.next()) it.getInt(1)
+				else throw SQLException("Couldn't get or put a key")
+			}
+		}
+		
+	}
+}
+
+///
+
+fun Connection.fetchInt(@Language("SQL") sql: String): Int {
+	return fetchIntOrElse(sql) {
+		throw SQLException("Query has empty result")
+	}
+}
+
+inline fun Connection.fetchIntOrElse(@Language("SQL") sql: String, other: Connection.() -> Int): Int {
+	execute(sql) {
+		if (next()) {
+			return getInt(1)
+		}
+	}
+	return other()
+}
+
+fun Connection.fetchIntMaybe(@Language("SQL") sql: String): Int? {
+	execute(sql) {
+		if (next()) {
+			return getInt(1)
+		}
+	}
+	return null
+}
+
+inline fun Connection.fetchInt(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
+	return fetchIntOrElse(sql, setup) {
+		throw SQLException("Query has empty result")
+	}
+}
+
+inline fun Connection.fetchIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Int): Int {
+	execute(sql, setup) {
+		if (next()) {
+			return getInt(1)
+		}
+	}
+	return other()
+}
+
+inline fun Connection.fetchIntMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int? {
+	execute(sql, setup) {
+		if (next()) {
+			return getInt(1)
+		}
+	}
+	return null
+}
+
+///
+
+fun Connection.fetchLong(@Language("SQL") sql: String): Long {
+	return fetchLongOrElse(sql) {
+		throw SQLException("Query has empty result")
+	}
+}
+
+inline fun Connection.fetchLongOrElse(@Language("SQL") sql: String, other: Connection.() -> Long): Long {
+	execute(sql) {
+		if (next()) {
+			return getLong(1)
+		}
+	}
+	return other()
+}
+
+fun Connection.fetchLongMaybe(@Language("SQL") sql: String): Long? {
+	execute(sql) {
+		if (next()) {
+			return getLong(1)
+		}
+	}
+	return null
+}
+
+inline fun Connection.fetchLong(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long {
+	return fetchLongOrElse(sql, setup) {
+		throw SQLException("Query has empty result")
+	}
+}
+
+inline fun Connection.fetchLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Long): Long {
+	execute(sql, setup) {
+		if (next()) {
+			return getLong(1)
+		}
+	}
+	return other()
+}
+
+inline fun Connection.fetchLongMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long? {
+	execute(sql, setup) {
+		if (next()) {
+			return getLong(1)
+		}
+	}
+	return null
+}
+
+///
+
+fun Connection.fetchBoolean(@Language("SQL") sql: String): Boolean {
+	return fetchBooleanOrElse(sql) {
+		throw SQLException("Query has empty result")
+	}
+}
+
+inline fun Connection.fetchBooleanOrElse(@Language("SQL") sql: String, other: Connection.() -> Boolean): Boolean {
+	execute(sql) {
+		if (next()) {
+			return getBoolean(1)
+		}
+	}
+	return other()
+}
+
+fun Connection.fetchBooleanMaybe(@Language("SQL") sql: String): Boolean? {
+	execute(sql) {
+		if (next()) {
+			return getBoolean(1)
+		}
+	}
+	return null
+}
+
+inline fun Connection.fetchBoolean(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean {
+	return fetchBooleanOrElse(sql, setup) {
+		throw SQLException("Query has empty result")
+	}
+}
+
+inline fun Connection.fetchBooleanOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Boolean): Boolean {
+	execute(sql, setup) {
+		if (next()) {
+			return getBoolean(1)
+		}
+	}
+	return other()
+}
+
+inline fun Connection.fetchBooleanMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean? {
+	execute(sql, setup) {
+		if (next()) {
+			return getBoolean(1)
+		}
+	}
+	return null
+}

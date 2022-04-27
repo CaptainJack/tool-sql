@@ -186,3 +186,92 @@ inline fun DataSource.updateAndGetGeneratedKeyLongOrElse(@Language("SQL") sql: S
 inline fun <E> DataSource.updateBatch(@Language("SQL") sql: String, collection: Collection<E>, batch: Int = collection.size, setup: AddablePreparedStatement.(E) -> Unit) {
 	connection { updateBatch(sql, collection, batch, setup) }
 }
+
+///
+
+
+inline fun DataSource.getOrPutGeneratedKeyInt(
+	@Language("SQL") get: String, getSetup: AddablePreparedStatement.() -> Unit,
+	@Language("SQL") put: String, putSetup: AddablePreparedStatement.() -> Unit,
+): Int {
+	return connection { getOrPutGeneratedKeyInt(get, getSetup, put, putSetup) }
+}
+
+///
+
+fun DataSource.fetchInt(@Language("SQL") sql: String): Int {
+	return connection { fetchInt(sql) }
+}
+
+inline fun DataSource.fetchIntOrElse(@Language("SQL") sql: String, other: Connection.() -> Int): Int {
+	return connection { fetchIntOrElse(sql, other) }
+}
+
+fun DataSource.fetchIntMaybe(@Language("SQL") sql: String): Int? {
+	return connection { fetchIntMaybe(sql) }
+}
+
+inline fun DataSource.fetchInt(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int {
+	return connection { fetchInt(sql, setup) }
+}
+
+inline fun DataSource.fetchIntOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Int): Int {
+	return connection { fetchIntOrElse(sql, setup, other) }
+}
+
+inline fun DataSource.fetchIntMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Int? {
+	return connection { fetchIntMaybe(sql, setup) }
+}
+
+///
+
+fun DataSource.fetchLong(@Language("SQL") sql: String): Long {
+	return connection { fetchLong(sql) }
+}
+
+inline fun DataSource.fetchLongOrElse(@Language("SQL") sql: String, other: Connection.() -> Long): Long {
+	return connection { fetchLongOrElse(sql, other) }
+}
+
+fun DataSource.fetchLongMaybe(@Language("SQL") sql: String): Long? {
+	return connection { fetchLongMaybe(sql) }
+}
+
+inline fun DataSource.fetchLong(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long {
+	return connection { fetchLong(sql, setup) }
+}
+
+inline fun DataSource.fetchLongOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Long): Long {
+	return connection { fetchLongOrElse(sql, setup, other) }
+}
+
+inline fun DataSource.fetchLongMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Long? {
+	return connection { fetchLongMaybe(sql, setup) }
+}
+
+///
+
+
+fun DataSource.fetchBoolean(@Language("SQL") sql: String): Boolean {
+	return connection { fetchBoolean(sql) }
+}
+
+inline fun DataSource.fetchBooleanOrElse(@Language("SQL") sql: String, other: Connection.() -> Boolean): Boolean {
+	return connection { fetchBooleanOrElse(sql, other) }
+}
+
+fun DataSource.fetchBooleanMaybe(@Language("SQL") sql: String): Boolean? {
+	return connection { fetchBooleanMaybe(sql) }
+}
+
+inline fun DataSource.fetchBoolean(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean {
+	return connection { fetchBoolean(sql, setup) }
+}
+
+inline fun DataSource.fetchBooleanOrElse(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit, other: Connection.() -> Boolean): Boolean {
+	return connection { fetchBooleanOrElse(sql, setup, other) }
+}
+
+inline fun DataSource.fetchBooleanMaybe(@Language("SQL") sql: String, setup: AddablePreparedStatement.() -> Unit): Boolean? {
+	return connection { fetchBooleanMaybe(sql, setup) }
+}
