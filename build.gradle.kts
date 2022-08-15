@@ -1,5 +1,5 @@
 plugins {
-	kotlin("jvm") version "1.6.21"
+	kotlin("jvm") version "1.7.10"
 	id("ru.capjack.publisher") version "1.0.0"
 }
 
@@ -10,5 +10,5 @@ repositories {
 }
 
 kotlin {
-	target.compilations.all { kotlinOptions.jvmTarget = "11" }
+	target.compilations.all { kotlinOptions.jvmTarget = "17" }
 }
