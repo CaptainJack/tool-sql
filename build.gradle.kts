@@ -1,6 +1,6 @@
 plugins {
-	kotlin("jvm") version "1.7.10"
-	id("ru.capjack.publisher") version "1.0.0"
+	kotlin("jvm") version "1.8.21"
+	id("ru.capjack.publisher") version "1.1.0"
 }
 
 group = "ru.capjack.tool"
@@ -10,5 +10,5 @@ repositories {
 }
 
 kotlin {
-	target.compilations.all { kotlinOptions.jvmTarget = "17" }
+	jvmToolchain(17)
 }
